@@ -1,0 +1,68 @@
+<div class="max-w-4xl">
+  <h1 class="text-lg font-semibold text-navy-900 mb-1">Teams &amp; Sub-teams</h1>
+  <p class="text-sm text-slate-500 mb-5">Configure the organization structure used across the dashboard.</p>
+
+  @if (errorMsg()) {
+    <div class="rounded-md bg-danger-50 border border-danger-500/30 text-danger-700 text-sm px-4 py-2.5 mb-4">{{ errorMsg() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="card-base p-6 text-sm text-slate-500">Loading…</div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <!-- Teams -->
+      <div class="card-base p-5">
+        <h2 class="text-sm font-semibold text-navy-900 mb-3">Teams</h2>
+        <div class="space-y-2 mb-4">
+          @for (t of teams(); track t.id) {
+            <div class="flex items-center justify-between px-3 py-2 rounded-md border border-slate-200"
+                 [class.bg-slate-50]="t.id === selectedTeamId()">
+              <button type="button" class="text-sm text-left flex-1" (click)="selectedTeamId.set(t.id)">
+                {{ t.name }}
+                @if (t.description) {<span class="text-slate-400"> — {{ t.description }}</span>}
+              </button>
+              <button type="button" class="text-xs px-2 py-1 rounded"
+                      [class.text-danger-600]="t.active" [class.text-success-600]="!t.active"
+                      (click)="toggleTeamActive(t)">
+                {{ t.active ? 'Deactivate' : 'Activate' }}
+              </button>
+            </div>
+          }
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 space-y-2">
+          <input class="input-base" placeholder="New team name" [ngModel]="newTeamName()" (ngModelChange)="newTeamName.set($event)" />
+          <input class="input-base" placeholder="Description (optional)" [ngModel]="newTeamDesc()" (ngModelChange)="newTeamDesc.set($event)" />
+          <button type="button" class="btn-primary w-full" (click)="addTeam()">Add Team</button>
+        </div>
+      </div>
+
+      <!-- Sub-teams -->
+      <div class="card-base p-5">
+        <h2 class="text-sm font-semibold text-navy-900 mb-3">
+          Sub-teams @if (selectedTeamId()) { <span class="text-slate-400">— {{ selectedTeamName() }} - {{ selectedTeamCapacity() }} capacity</span> }
+        </h2>
+        <div class="space-y-2 mb-4">
+          @for (st of subTeamsForSelected(); track st.id) {
+            <div class="flex items-center justify-between px-3 py-2 rounded-md border border-slate-200">
+              <span class="text-sm">{{ st.name }}</span>
+              <button type="button" class="text-xs px-2 py-1 rounded"
+                      [class.text-danger-600]="st.active" [class.text-success-600]="!st.active"
+                      (click)="toggleSubTeamActive(st)">
+                {{ st.active ? 'Deactivate' : 'Activate' }}
+              </button>
+            </div>
+          }
+          @if (subTeamsForSelected().length === 0) {
+            <p class="text-sm text-slate-400">No sub-teams yet.</p>
+          }
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 space-y-2">
+          <input class="input-base" placeholder="New sub-team name" [ngModel]="newSubTeamName()" (ngModelChange)="newSubTeamName.set($event)" [disabled]="!selectedTeamId()" />
+          <button type="button" class="btn-primary w-full" (click)="addSubTeam()" [disabled]="!selectedTeamId()">Add Sub-team</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

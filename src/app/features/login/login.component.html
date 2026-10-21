@@ -1,0 +1,78 @@
+<div class="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+  <div class="w-full max-w-sm">
+    <div class="text-center mb-6">
+      <div class="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-brand-600 text-white font-semibold text-lg mb-3">
+        W
+      </div>
+      <h1 class="text-xl font-semibold text-navy-900">WSR Dashboard</h1>
+      <p class="text-sm text-slate-500 mt-1">Sprint capacity &amp; delivery tracking</p>
+    </div>
+
+    <div class="card-base p-6">
+      @if (mode() === 'login') {
+        <form [formGroup]="form" (ngSubmit)="submitLogin()" class="space-y-4">
+          <div>
+            <label class="label-base" for="email">Email</label>
+            <input id="email" type="email" formControlName="email" class="input-base" placeholder="you@company.com" autocomplete="email" />
+            @if (form.controls.email.touched && form.controls.email.invalid) {
+              <p class="field-error">Enter a valid email address.</p>
+            }
+          </div>
+
+          <div>
+            <label class="label-base" for="password">Password</label>
+            <input id="password" type="password" formControlName="password" class="input-base" placeholder="••••••••" autocomplete="current-password" />
+            @if (form.controls.password.touched && form.controls.password.invalid) {
+              <p class="field-error">Password is required.</p>
+            }
+          </div>
+
+          @if (errorMsg()) {
+            <div class="rounded-md bg-danger-50 border border-danger-500/30 text-danger-700 text-sm px-3 py-2">
+              {{ errorMsg() }}
+            </div>
+          }
+
+          <button type="submit" class="btn-primary w-full" [disabled]="submitting()">
+            {{ submitting() ? 'Signing in…' : 'Login' }}
+          </button>
+
+          <button type="button" class="text-sm text-brand-600 hover:underline w-full text-center" (click)="switchMode('forgot')">
+            Forgot password?
+          </button>
+        </form>
+      } @else {
+        <form [formGroup]="forgotForm" (ngSubmit)="submitForgot()" class="space-y-4">
+          <p class="text-sm text-slate-600">Enter your email and we'll send you a reset link.</p>
+
+          <div>
+            <label class="label-base" for="forgot-email">Email</label>
+            <input id="forgot-email" type="email" formControlName="email" class="input-base" placeholder="you@company.com" />
+            @if (forgotForm.controls.email.touched && forgotForm.controls.email.invalid) {
+              <p class="field-error">Enter a valid email address.</p>
+            }
+          </div>
+
+          @if (errorMsg()) {
+            <div class="rounded-md bg-danger-50 border border-danger-500/30 text-danger-700 text-sm px-3 py-2">
+              {{ errorMsg() }}
+            </div>
+          }
+          @if (infoMsg()) {
+            <div class="rounded-md bg-success-50 border border-success-500/30 text-success-700 text-sm px-3 py-2">
+              {{ infoMsg() }}
+            </div>
+          }
+
+          <button type="submit" class="btn-primary w-full" [disabled]="submitting()">
+            {{ submitting() ? 'Sending…' : 'Send reset link' }}
+          </button>
+
+          <button type="button" class="text-sm text-slate-500 hover:underline w-full text-center" (click)="switchMode('login')">
+            Back to login
+          </button>
+        </form>
+      }
+    </div>
+  </div>
+</div>

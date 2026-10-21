@@ -1,0 +1,107 @@
+<div>
+  <div class="flex items-center justify-between mb-5">
+    <div>
+      <h1 class="text-lg font-semibold text-navy-900">Sprint Management</h1>
+      <p class="text-sm text-slate-500">Create sprints and control their lifecycle status.</p>
+    </div>
+    <button type="button" class="btn-primary" (click)="startCreate()">+ New Sprint</button>
+  </div>
+
+  @if (errorMsg()) {
+    <div class="rounded-md bg-danger-50 border border-danger-500/30 text-danger-700 text-sm px-4 py-2.5 mb-4">{{ errorMsg() }}</div>
+  }
+
+  @if (editingId()) {
+    <div class="card-base p-5 mb-5">
+      <h2 class="text-sm font-semibold text-navy-900 mb-4">{{ editingId() === 'new' ? 'New Sprint' : 'Edit Sprint' }}</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="label-base">Sprint Name *</label>
+          <input class="input-base" [ngModel]="draft().name" (ngModelChange)="updateDraft('name', $event)" placeholder="Sprint 25" />
+        </div>
+        <div>
+          <label class="label-base">Status</label>
+          <select class="input-base" [ngModel]="draft().status" (ngModelChange)="updateDraft('status', $event)">
+            @for (s of statuses; track s) {<option [value]="s">{{ s }}</option>}
+          </select>
+        </div>
+        <div>
+          <label class="label-base">Start Date *</label>
+          <input class="input-base" type="date" [ngModel]="draft().start_date" (ngModelChange)="updateDraft('start_date', $event)" />
+        </div>
+        <div>
+          <label class="label-base">End Date *</label>
+          <input class="input-base" type="date" [ngModel]="draft().end_date" (ngModelChange)="updateDraft('end_date', $event)" />
+        </div>
+        <div class="sm:col-span-2">
+          <label class="label-base">Team Capacities (hrs)</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            @for (t of teams(); track t.id) {
+              <div class="flex items-center gap-2">
+                <div class="w-36 text-sm">{{ t.name }}</div>
+                <input class="input-base" type="number" min="0" [ngModel]="draftCapacity(t.id)" (ngModelChange)="updateTeamCapacity(t.id, $event)" />
+              </div>
+            }
+          </div>
+        </div>
+        <div>
+          <label class="label-base">Sprint Capacity (hrs)</label>
+          <input class="input-base" type="number" min="0" [ngModel]="draft().capacity" (ngModelChange)="updateDraft('capacity', $event)" />
+        </div>
+      </div>
+      <div class="flex justify-end gap-3 mt-4">
+        <button type="button" class="btn-secondary" (click)="cancelEdit()">Cancel</button>
+        <button type="button" class="btn-primary" (click)="save()" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save' }}</button>
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="card-base p-6 text-sm text-slate-500">Loading…</div>
+  } @else {
+    <div class="card-base overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 text-slate-500 text-xs uppercase">
+          <tr>
+            <th class="text-left px-4 py-2 font-medium">Sprint</th>
+            <th class="text-left px-4 py-2 font-medium">Start</th>
+            <th class="text-left px-4 py-2 font-medium">End</th>
+            <th class="text-left px-4 py-2 font-medium">Capacity</th>
+            <th class="text-left px-4 py-2 font-medium">Status</th>
+            <th class="text-right px-4 py-2 font-medium">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          @for (s of sprints(); track s.id) {
+            <tr>
+              <td class="px-4 py-2.5 font-medium text-navy-900">{{ s.name }}</td>
+              <td class="px-4 py-2.5">{{ s.start_date }}</td>
+              <td class="px-4 py-2.5">{{ s.end_date }}</td>
+              <td class="px-4 py-2.5">{{ s.capacity }} hrs</td>
+              <td class="px-4 py-2.5">
+                <span class="px-2 py-0.5 rounded-full text-xs"
+                  [class.bg-brand-50]="s.status === 'Active'" [class.text-brand-700]="s.status === 'Active'"
+                  [class.bg-success-50]="s.status === 'Completed'" [class.text-success-700]="s.status === 'Completed'"
+                  [class.bg-slate-100]="s.status === 'Planned' || s.status === 'Closed'" [class.text-slate-600]="s.status === 'Planned' || s.status === 'Closed'">
+                  {{ s.status }}
+                </span>
+              </td>
+              <td class="px-4 py-2.5 text-right space-x-2">
+                <button type="button" class="text-brand-600 hover:underline" (click)="startEdit(s)">Edit</button>
+                @if (s.status === 'Planned') {
+                  <button type="button" class="text-success-600 hover:underline" (click)="setStatus(s, 'Active')">Activate</button>
+                }
+                @if (s.status === 'Active') {
+                  <button type="button" class="text-slate-500 hover:underline" (click)="setStatus(s, 'Completed')">Complete</button>
+                }
+                @if (s.status === 'Completed') {
+                  <button type="button" class="text-danger-600 hover:underline" (click)="setStatus(s, 'Closed')">Close</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

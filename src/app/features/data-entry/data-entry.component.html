@@ -1,0 +1,251 @@
+<div class="max-w-6xl mx-auto grid grid-cols-12 gap-6">
+  <aside class="col-span-3">
+    <div class="mb-4">
+      <h3 class="text-sm font-semibold">Saved WSRs</h3>
+    </div>
+    <div class="space-y-2">
+        <div class="flex items-center justify-between mb-2">
+        <div class="text-xs text-slate-500">Saved WSRs</div>
+        <button class="btn-tertiary text-xs px-2" type="button" (click)="loadExistingReports($any(form.controls.developer_id.value), $any(form.controls.sprint_id.value))">Refresh</button>
+      </div>
+      @if (existingReports().length === 0) {
+        <div class="card-base p-4 text-sm text-slate-500">No saved WSRs for selected sprint/developer</div>
+      } @else {
+        @for (r of existingReports(); track r.id) {
+          <div class="border rounded p-3 flex items-center justify-between">
+              <div (click)="debugLog(r)" style="cursor:pointer">
+              <div class="text-sm font-medium">{{ r.sprint_name }} — Week {{ r.week_number ?? 1 }}</div>
+              <div class="text-xs text-slate-500">{{ r.developer_name }} • {{ r.status }}</div>
+            </div>
+            <div>
+              <button class="btn-secondary" (click)="loadReportById(r.id)">Edit</button>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  </aside>
+
+  <main class="col-span-9">
+    <div class="mb-5">
+      <h1 class="text-lg font-semibold text-navy-900">WSR Data Entry</h1>
+      <p class="text-sm text-slate-500">
+        {{ existingId() ? 'Editing existing record for this developer + sprint.' : 'Creating a new record.' }}
+      </p>
+    </div>
+  @if (loading()) {
+    <div class="card-base p-6 text-sm text-slate-500">Loading form data…</div>
+  } @else {
+    <form [formGroup]="form" class="space-y-5">
+      @if (successMsg()) {
+        <div class="rounded-md bg-success-50 border border-success-500/30 text-success-700 text-sm px-4 py-2.5">
+          {{ successMsg() }}
+        </div>
+      }
+      @if (errorMsg()) {
+        <div class="rounded-md bg-danger-50 border border-danger-500/30 text-danger-700 text-sm px-4 py-2.5">
+          {{ errorMsg() }}
+        </div>
+      }
+
+      <!-- Section 1: Sprint Information -->
+      <section class="card-base p-5">
+        <h2 class="text-sm font-semibold text-navy-900 mb-4">1. Sprint Information</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="label-base">Sprint *</label>
+            <select formControlName="sprint_id" class="input-base">
+              <option value="" disabled>Select sprint</option>
+              @for (s of sprints(); track s.id) {
+                <option [value]="s.id">{{ s.name }} ({{ s.status }})</option>
+              }
+            </select>
+            @if (week1Start()) {
+              <div class="text-xs text-slate-500 mt-2">
+                <div>Week 1: <strong>{{ week1Start() }}</strong> → <strong>{{ week1End() }}</strong></div>
+                <div>Week 2: <strong>{{ week2Start() }}</strong> → <strong>{{ week2End() }}</strong></div>
+              </div>
+            }
+          </div>
+          <div>
+            <label class="label-base">Team *</label>
+            <select formControlName="team_id" class="input-base">
+              <option value="" disabled>Select team</option>
+              @for (t of teams(); track t.id) {
+                <option [value]="t.id">{{ t.name }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label class="label-base">Sub-team</label>
+            <select formControlName="sub_team_id" class="input-base" [disabled]="!form.controls.team_id.value">
+              <option value="">None</option>
+              @for (st of filteredSubTeams(); track st.id) {
+                <option [value]="st.id">{{ st.name }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label class="label-base">Developer *</label>
+            <select formControlName="developer_id" class="input-base" [disabled]="!form.controls.team_id.value">
+              <option value="" disabled>Select developer</option>
+              @for (d of filteredDevelopers(); track d.id) {
+                <option [value]="d.id">{{ d.name }} ({{ d.role }})</option>
+              }
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Capacity -->
+      <section class="card-base p-5">
+        <h2 class="text-sm font-semibold text-navy-900 mb-4">2. Capacity</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="label-base">Sprint Capacity (hrs) *</label>
+            <app-number-stepper formControlName="sprint_capacity"></app-number-stepper>
+          </div>
+          <div>
+            <label class="label-base">Reported Hours *</label>
+            <app-number-stepper formControlName="reported_hours"></app-number-stepper>
+            @if (fieldErrors()['reported_hours']) {<p class="field-error">{{ fieldErrors()['reported_hours'] }}</p>}
+          </div>
+          <div>
+            <label class="label-base">Leave Hours *</label>
+            <app-number-stepper formControlName="leave_hours"></app-number-stepper>
+            @if (fieldErrors()['leave_hours']) {<p class="field-error">{{ fieldErrors()['leave_hours'] }}</p>}
+          </div>
+          <div>
+            <label class="label-base">Leave Dates</label>
+            <div class="flex gap-2">
+              <input type="date" class="input-base" [value]="newLeaveDate()" (change)="newLeaveDate.set($any($event.target).value)" />
+              <button type="button" class="btn-secondary px-3" (click)="addLeaveDate()">Add</button>
+            </div>
+            @if (form.controls.leave_dates.value?.length) {
+              <div class="flex flex-wrap gap-1.5 mt-2">
+                @for (d of form.controls.leave_dates.value; track d) {
+                  <span class="inline-flex items-center gap-1 bg-slate-100 text-slate-700 text-xs px-2 py-1 rounded">
+                    {{ d }}
+                    <button type="button" class="text-slate-400 hover:text-danger-500" (click)="removeLeaveDate(d)">×</button>
+                  </span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-100">
+          <div>
+            <p class="label-base">Available Capacity</p>
+            <p class="text-lg font-semibold text-navy-900">{{ calc().availableCapacity }} hrs</p>
+          </div>
+          <div>
+            <p class="label-base">Utilization %</p>
+            <div class="flex items-center gap-2">
+              <p class="text-lg font-semibold text-navy-900">{{ calc().utilizationPct }}%</p>
+            </div>
+            <app-progress-bar class="mt-1 block" [value]="calc().utilizationPct" [level]="calc().utilizationLevel"></app-progress-bar>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Story Delivery -->
+      <section class="card-base p-5">
+        <h2 class="text-sm font-semibold text-navy-900 mb-4">3. Story Delivery</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="label-base">Stories Planned *</label>
+            <app-number-stepper formControlName="stories_planned"></app-number-stepper>
+          </div>
+          <div>
+            <label class="label-base">Stories Delivered *</label>
+            <app-number-stepper formControlName="stories_delivered"></app-number-stepper>
+          </div>
+          <div>
+            <label class="label-base">Story Points Planned *</label>
+            <app-number-stepper formControlName="story_points_planned"></app-number-stepper>
+          </div>
+          <div>
+            <label class="label-base">Story Points Delivered *</label>
+            <app-number-stepper formControlName="story_points_delivered"></app-number-stepper>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-100">
+          <div>
+            <p class="label-base">Story Delivery %</p>
+            <p class="text-lg font-semibold text-navy-900">{{ calc().storyDeliveryPct }}%</p>
+            <app-progress-bar class="mt-1 block" [value]="calc().storyDeliveryPct" [level]="calc().storyDeliveryLevel"></app-progress-bar>
+          </div>
+          <div>
+            <p class="label-base">Story Point Delivery %</p>
+            <p class="text-lg font-semibold text-navy-900">{{ calc().storyPointDeliveryPct }}%</p>
+            <app-progress-bar class="mt-1 block" [value]="calc().storyPointDeliveryPct" [level]="calc().storyPointDeliveryLevel"></app-progress-bar>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Quality -->
+      <section class="card-base p-5">
+        <h2 class="text-sm font-semibold text-navy-900 mb-4">4. Quality</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="label-base">QA Defects</label>
+            <app-number-stepper formControlName="qa_defects"></app-number-stepper>
+          </div>
+          <div>
+            <label class="label-base">UAT Defects</label>
+            <app-number-stepper formControlName="uat_defects"></app-number-stepper>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5: Status -->
+      <section class="card-base p-5">
+        <h2 class="text-sm font-semibold text-navy-900 mb-4">5. Status</h2>
+        <div class="space-y-4">
+          <div>
+            <label class="label-base">Highlights</label>
+            <textarea formControlName="highlights" rows="2" class="input-base"></textarea>
+          </div>
+          <div>
+            <label class="label-base">Blockers</label>
+            <textarea formControlName="blockers" rows="2" class="input-base"></textarea>
+          </div>
+          <div>
+            <label class="label-base">Comments</label>
+            <textarea formControlName="comments" rows="2" class="input-base"></textarea>
+          </div>
+        </div>
+      </section>
+
+      @if (warnings().length) {
+        <div class="rounded-md bg-warning-50 border border-warning-500/30 text-warning-700 text-sm px-4 py-3 space-y-1">
+          <p class="font-medium">Validation warnings</p>
+          <ul class="list-disc pl-5">
+            @for (w of warnings(); track w.field) {<li>{{ w.message }}</li>}
+          </ul>
+          @if (auth.isAdmin()) {
+            <label class="flex items-center gap-2 mt-2 text-warning-700">
+              <input type="checkbox" [checked]="overrideWarnings()" (change)="overrideWarnings.set($any($event.target).checked)" />
+              Override validation warnings (Admin only)
+            </label>
+          }
+        </div>
+      }
+
+      <!-- Actions -->
+      <div class="flex flex-wrap gap-3 justify-end pb-6">
+        <button type="button" class="btn-secondary" (click)="resetForm()" [disabled]="saving()">Reset</button>
+        <button type="button" class="btn-secondary" (click)="cancel()" [disabled]="saving()">Cancel</button>
+        <button type="button" class="btn-secondary" (click)="saveDraft()" [disabled]="saving()">
+          {{ saving() ? 'Saving…' : 'Save Draft' }}
+        </button>
+        <button type="button" class="btn-primary" (click)="submit()" [disabled]="saving()">
+          {{ saving() ? 'Submitting…' : 'Submit' }}
+        </button>
+      </div>
+    </form>
+  }
+  </main>
+</div>

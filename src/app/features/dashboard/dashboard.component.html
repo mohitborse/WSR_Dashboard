@@ -1,0 +1,119 @@
+<div>
+  <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
+    <div>
+      <h1 class="text-lg font-semibold text-navy-900">Dashboard</h1>
+      <p class="text-sm text-slate-500">Sprint capacity, delivery and quality at a glance.</p>
+    </div>
+    @if (auth.canEdit()) {
+      <a routerLink="/data-entry" class="btn-primary">+ New WSR Entry</a>
+    }
+  </div>
+
+  <!-- Filter bar -->
+  <div class="card-base p-4 mb-5 flex flex-wrap items-end gap-3">
+    <div class="min-w-[160px]">
+      <label class="label-base">Sprint</label>
+      <select class="input-base" [ngModel]="sprintId()" (ngModelChange)="sprintId.set($event); reload()">
+        <option value="">All sprints</option>
+        @for (s of sprints(); track s.id) {
+          <option [value]="s.id">{{ s.name }} ({{ s.status }})</option>
+        }
+      </select>
+    </div>
+    <div class="min-w-[160px]">
+      <label class="label-base">Team</label>
+      <select class="input-base" [ngModel]="teamId()" (ngModelChange)="teamId.set($event); onTeamChange(); reload()">
+        <option value="">All teams</option>
+        @for (t of teams(); track t.id) {
+          <option [value]="t.id">{{ t.name }}</option>
+        }
+      </select>
+    </div>
+    <div class="min-w-[160px]">
+      <label class="label-base">Sub-team</label>
+      <select class="input-base" [ngModel]="subTeamId()" (ngModelChange)="subTeamId.set($event); onSubTeamChange()">
+        <option value="">All sub-teams</option>
+        @for (st of filteredSubTeams(); track st.id) {
+          <option [value]="st.id">{{ st.name }}</option>
+        }
+      </select>
+    </div>
+    <div class="min-w-[160px]">
+      <label class="label-base">Developer</label>
+      <select class="input-base" [ngModel]="developerId()" (ngModelChange)="developerId.set($event)">
+        <option value="">All developers</option>
+        @for (d of filteredDevelopers(); track d.id) {
+          <option [value]="d.id">{{ d.name }}</option>
+        }
+      </select>
+    </div>
+    <button type="button" class="btn-secondary" (click)="clearFilters()">Clear filters</button>
+  </div>
+
+  @if (loading()) {
+    <div class="card-base p-6 text-sm text-slate-500">Loading dashboard…</div>
+  } @else if (errorMsg()) {
+    <div class="rounded-md bg-danger-50 border border-danger-500/30 text-danger-700 text-sm px-4 py-3">{{ errorMsg() }}</div>
+  } @else {
+    <!-- KPI cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+      <div class="card-base p-3">
+        <p class="text-xs text-slate-500">Developers</p>
+        <p class="text-xl font-semibold text-navy-900">{{ kpis().developers }}</p>
+      </div>
+      <div class="card-base p-3">
+        <p class="text-xs text-slate-500">Total Capacity</p>
+        <p class="text-xl font-semibold text-navy-900">{{ kpis().capacity }} hrs</p>
+      </div>
+      <div class="card-base p-3">
+        <p class="text-xs text-slate-500">Reported Hours</p>
+        <p class="text-xl font-semibold text-navy-900">{{ kpis().reportedHours }} hrs</p>
+      </div>
+      <div class="card-base p-3">
+        <p class="text-xs text-slate-500">Utilization</p>
+        <p class="text-xl font-semibold" [class.text-success-700]="overallUtilLevel() === 'good'" [class.text-warning-700]="overallUtilLevel() === 'warning'" [class.text-danger-700]="overallUtilLevel() === 'risk'">
+          {{ kpis().utilizationPct }}%
+        </p>
+      </div>
+      <div class="card-base p-3">
+        <p class="text-xs text-slate-500">Stories Planned / Delivered</p>
+        <p class="text-xl font-semibold text-navy-900">{{ kpis().storiesDelivered }} / {{ kpis().storiesPlanned }}</p>
+      </div>
+      <div class="card-base p-3">
+        <p class="text-xs text-slate-500">Story Points Planned / Delivered</p>
+        <p class="text-xl font-semibold text-navy-900">{{ kpis().pointsDelivered }} / {{ kpis().pointsPlanned }}</p>
+      </div>
+      <div class="card-base p-3">
+        <p class="text-xs text-slate-500">Story Delivery %</p>
+        <p class="text-xl font-semibold text-navy-900">{{ kpis().storyDeliveryPct }}%</p>
+      </div>
+      <div class="card-base p-3">
+        <p class="text-xs text-slate-500">Story Point Delivery %</p>
+        <p class="text-xl font-semibold text-navy-900">{{ kpis().storyPointDeliveryPct }}%</p>
+      </div>
+      <div class="card-base p-3">
+        <p class="text-xs text-slate-500">QA Defects</p>
+        <p class="text-xl font-semibold text-navy-900">{{ kpis().qaDefects }}</p>
+      </div>
+      <div class="card-base p-3">
+        <p class="text-xs text-slate-500">UAT Defects</p>
+        <p class="text-xl font-semibold text-navy-900">{{ kpis().uatDefects }}</p>
+      </div>
+    </div>
+
+    <!-- Developer cards -->
+    <h2 class="text-sm font-semibold text-navy-900 mb-3">Developers</h2>
+    @if (filteredReports().length === 0) {
+      <div class="card-base p-6 text-sm text-slate-500 text-center">
+        No WSR records match the current filters.
+        @if (auth.canEdit()) { <a routerLink="/data-entry" class="text-brand-600 hover:underline">Add one</a>. }
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        @for (r of filteredReports(); track r.id) {
+          <app-developer-card [report]="r"></app-developer-card>
+        }
+      </div>
+    }
+  }
+</div>

@@ -1,0 +1,38 @@
+<div class="card-base p-4">
+  <div class="flex items-start justify-between mb-3">
+    <div>
+      <p class="font-medium text-navy-900 text-sm">{{ report.developer_name }}</p>
+      <p class="text-xs text-slate-500">{{ report.team_name }}<span *ngIf="report.sub_team_name"> • {{ report.sub_team_name }}</span></p>
+    </div>
+    <app-status-badge [level]="utilLevel"></app-status-badge>
+  </div>
+
+  <div class="space-y-3">
+    <div>
+      <div class="flex justify-between text-xs text-slate-500 mb-1">
+        <span>Capacity</span>
+        <span>{{ report.reported_hours }} / {{ report.sprint_capacity }} hrs · {{ util }}%</span>
+      </div>
+      <app-progress-bar [value]="util" [level]="utilLevel"></app-progress-bar>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 text-xs pt-1">
+      <div>
+        <p class="text-slate-500">Stories</p>
+        <p class="font-medium text-navy-900">{{ report.stories_delivered }} / {{ report.stories_planned }}</p>
+      </div>
+      <div>
+        <p class="text-slate-500">Points</p>
+        <p class="font-medium text-navy-900">{{ report.story_points_delivered }} / {{ report.story_points_planned }}</p>
+      </div>
+      <div>
+        <p class="text-slate-500">QA Defects</p>
+        <p class="font-medium text-navy-900">{{ report.qa_defects }}</p>
+      </div>
+      <div>
+        <p class="text-slate-500">UAT Defects</p>
+        <p class="font-medium text-navy-900">{{ report.uat_defects }}</p>
+      </div>
+    </div>
+  </div>
+</div>

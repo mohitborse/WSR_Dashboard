@@ -1,0 +1,100 @@
+<div class="max-w-4xl mx-auto">
+  <div class="mb-6">
+    <h1 class="text-lg font-semibold">Sprint Summary (Week-wise)</h1>
+    <p class="text-sm text-slate-500">Select a sprint to view week-by-week KPIs.</p>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+    <div>
+      <label class="label-base">Sprint</label>
+      <select class="input-base" (change)="loadForSprint($any($event.target).value)">
+        <option value="">Select sprint</option>
+        @for (s of sprints(); track s.id) {<option [value]="s.id">{{ s.name }} ({{ s.start_date }} → {{ s.end_date }})</option>}
+      </select>
+    </div>
+    <div>
+      <label class="label-base">Team</label>
+      <select class="input-base" (change)="onTeamChange($any($event.target).value)">
+        <option value="">All teams</option>
+        @for (t of teams(); track t.id) {<option [value]="t.id">{{ t.name }}</option>}
+      </select>
+    </div>
+  </div>
+
+  @if (loading()) { <div class="card-base p-4">Loading…</div> } @else {
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <section class="card-base p-4">
+      <h3 class="font-semibold">Week 1</h3>
+      <div class="mt-3 space-y-2 text-sm">
+        <div>Number of US: <strong>{{ kpisWeek1().storiesPlanned || 0 }}</strong></div>
+        <div>US Delivered: <strong>{{ kpisWeek1().storiesDelivered || 0 }}</strong></div>
+        <div>US Point Planned: <strong>{{ kpisWeek1().pointsPlanned || 0 }}</strong></div>
+        <div>US Point Delivered: <strong>{{ kpisWeek1().pointsDelivered || 0 }}</strong></div>
+        <div>QA Defects: <strong>{{ kpisWeek1().qaDefects || 0 }}</strong></div>
+        <div>UAT Defects: <strong>{{ kpisWeek1().uatDefects || 0 }}</strong></div>
+        <div>Sprint Leave: <strong>{{ kpisWeek1().leave || 0 }}</strong></div>
+      </div>
+    </section>
+
+    <section class="card-base p-4">
+      <h3 class="font-semibold">Week 2</h3>
+      <div class="mt-3 space-y-2 text-sm">
+        <div>Number of US: <strong>{{ kpisWeek2().storiesPlanned || 0 }}</strong></div>
+        <div>US Delivered: <strong>{{ kpisWeek2().storiesDelivered || 0 }}</strong></div>
+        <div>US Point Planned: <strong>{{ kpisWeek2().pointsPlanned || 0 }}</strong></div>
+        <div>US Point Delivered: <strong>{{ kpisWeek2().pointsDelivered || 0 }}</strong></div>
+        <div>QA Defects: <strong>{{ kpisWeek2().qaDefects || 0 }}</strong></div>
+        <div>UAT Defects: <strong>{{ kpisWeek2().uatDefects || 0 }}</strong></div>
+        <div>Sprint Leave: <strong>{{ kpisWeek2().leave || 0 }}</strong></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+    <section class="card-base p-4">
+      <h3 class="font-semibold">Capacity vs Actual (Week 1)</h3>
+      <div class="mt-3 text-lg font-semibold">{{ teamPerWeek() }} / {{ weekActual1() }}</div>
+      <div class="text-sm text-slate-500">Team capacity (per week) / Actual reported hours</div>
+    </section>
+
+    <section class="card-base p-4">
+      <h3 class="font-semibold">Capacity vs Actual (Week 2)</h3>
+      <div class="mt-3 text-lg font-semibold">{{ teamPerWeek() }} / {{ weekActual2() }}</div>
+      <div class="text-sm text-slate-500">Team capacity (per week) / Actual reported hours</div>
+    </section>
+  </div>
+
+    <section class="card-base p-4 mt-4">
+    <h3 class="font-semibold">Developers</h3>
+    @if (filteredRows().length === 0) { <div class="text-sm text-slate-500">No WSR rows for this sprint/team selection.</div> } @else {
+      <table class="w-full text-sm mt-2">
+        <thead>
+          <tr class="text-left text-xs text-slate-500">
+            <th>Developer</th>
+            <th>Week</th>
+            <th>Reported Hrs</th>
+            <th>Leave Hrs</th>
+            <th>Stories</th>
+            <th>Points</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of filteredRows(); track r.id) {
+            <tr>
+              <td>{{ r.developer_name }}</td>
+              <td>{{ r.week_number ?? 1 }}</td>
+              <td>{{ r.reported_hours }}</td>
+              <td>{{ r.leave_hours }}</td>
+              <td>{{ r.stories_delivered }} / {{ r.stories_planned }}</td>
+              <td>{{ r.story_points_delivered }} / {{ r.story_points_planned }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </section>
+
+  }
+</div>
+

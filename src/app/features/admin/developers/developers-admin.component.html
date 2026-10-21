@@ -1,0 +1,105 @@
+<div>
+  <div class="flex items-center justify-between mb-5">
+    <div>
+      <h1 class="text-lg font-semibold text-navy-900">Developers</h1>
+      <p class="text-sm text-slate-500">Manage developer master data, team assignment and default capacity.</p>
+    </div>
+    <button type="button" class="btn-primary" (click)="startCreate()">+ Add Developer</button>
+  </div>
+
+  @if (errorMsg()) {
+    <div class="rounded-md bg-danger-50 border border-danger-500/30 text-danger-700 text-sm px-4 py-2.5 mb-4">{{ errorMsg() }}</div>
+  }
+
+  @if (editingId()) {
+    <div class="card-base p-5 mb-5">
+      <h2 class="text-sm font-semibold text-navy-900 mb-4">{{ editingId() === 'new' ? 'New Developer' : 'Edit Developer' }}</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="label-base">Name *</label>
+          <input class="input-base" [ngModel]="draft().name" (ngModelChange)="updateDraft('name', $event)" />
+        </div>
+        <div>
+          <label class="label-base">Email *</label>
+          <input class="input-base" type="email" [ngModel]="draft().email" (ngModelChange)="updateDraft('email', $event)" />
+        </div>
+        <div>
+          <label class="label-base">Team *</label>
+          <select class="input-base" [ngModel]="draft().team_id" (ngModelChange)="updateDraft('team_id', $event)">
+            <option value="" disabled>Select team</option>
+            @for (t of teams(); track t.id) {<option [value]="t.id">{{ t.name }}</option>}
+          </select>
+        </div>
+        <div>
+          <label class="label-base">Sub-team</label>
+          <select class="input-base" [ngModel]="draft().sub_team_id" (ngModelChange)="updateDraft('sub_team_id', $event)" [disabled]="!draft().team_id">
+            <option value="">None</option>
+            @for (st of draftSubTeams(); track st.id) {<option [value]="st.id">{{ st.name }}</option>}
+          </select>
+        </div>
+        <div>
+          <label class="label-base">Role</label>
+          <select class="input-base" [ngModel]="draft().role" (ngModelChange)="updateDraft('role', $event)">
+            @for (r of roles; track r) {<option [value]="r">{{ r }}</option>}
+          </select>
+        </div>
+        <div>
+          <label class="label-base">Default Sprint Capacity (hrs)</label>
+          <input class="input-base" type="number" min="0" [ngModel]="draft().default_sprint_capacity" (ngModelChange)="updateDraft('default_sprint_capacity', $event)" />
+        </div>
+        <div>
+          <label class="label-base">Joining Date</label>
+          <input class="input-base" type="date" [ngModel]="draft().joining_date" (ngModelChange)="updateDraft('joining_date', $event)" />
+        </div>
+      </div>
+      <div class="flex justify-end gap-3 mt-4">
+        <button type="button" class="btn-secondary" (click)="cancelEdit()">Cancel</button>
+        <button type="button" class="btn-primary" (click)="save()" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save' }}</button>
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="card-base p-6 text-sm text-slate-500">Loading…</div>
+  } @else {
+    <div class="card-base overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 text-slate-500 text-xs uppercase">
+          <tr>
+            <th class="text-left px-4 py-2 font-medium">Name</th>
+            <th class="text-left px-4 py-2 font-medium">Email</th>
+            <th class="text-left px-4 py-2 font-medium">Team</th>
+            <th class="text-left px-4 py-2 font-medium">Sub-team</th>
+            <th class="text-left px-4 py-2 font-medium">Role</th>
+            <th class="text-left px-4 py-2 font-medium">Capacity</th>
+            <th class="text-left px-4 py-2 font-medium">Status</th>
+            <th class="text-right px-4 py-2 font-medium">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          @for (d of developers(); track d.id) {
+            <tr>
+              <td class="px-4 py-2.5">{{ d.name }}</td>
+              <td class="px-4 py-2.5 text-slate-500">{{ d.email }}</td>
+              <td class="px-4 py-2.5">{{ teamName(d.team_id) }}</td>
+              <td class="px-4 py-2.5">{{ subTeamName(d.sub_team_id) }}</td>
+              <td class="px-4 py-2.5">{{ d.role }}</td>
+              <td class="px-4 py-2.5">{{ d.default_sprint_capacity }} hrs</td>
+              <td class="px-4 py-2.5">
+                <span class="px-2 py-0.5 rounded-full text-xs" [class.bg-success-50]="d.active" [class.text-success-700]="d.active" [class.bg-slate-100]="!d.active" [class.text-slate-500]="!d.active">
+                  {{ d.active ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td class="px-4 py-2.5 text-right space-x-3">
+                <button type="button" class="text-brand-600 hover:underline" (click)="startEdit(d)">Edit</button>
+                <button type="button" class="text-slate-500 hover:underline" (click)="toggleActive(d)">
+                  {{ d.active ? 'Deactivate' : 'Activate' }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

@@ -1,0 +1,116 @@
+<div class="max-w-4xl mx-auto">
+  <div class="mb-6">
+    <h1 class="text-lg font-semibold">Developer Summaries</h1>
+    <p class="text-sm text-slate-500">View tasks, highlights and comments grouped by developer for a sprint.</p>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+    <div>
+      <label class="label-base">Sprint</label>
+      <select class="input-base" (change)="loadForSprint($any($event.target).value)">
+        <option value="">Select sprint</option>
+        @for (s of sprints(); track s.id) {<option [value]="s.id">{{ s.name }} ({{ s.start_date }} → {{ s.end_date }})</option>}
+      </select>
+    </div>
+
+    <div>
+      <label class="label-base">Team</label>
+      <select class="input-base" (change)="selectedTeamId.set($any($event.target).value || null)">
+        <option value="">All teams</option>
+        @for (t of teams(); track t.id) {<option [value]="t.id">{{ t.name }}</option>}
+      </select>
+    </div>
+  </div>
+
+  @if (loading()) { <div class="card-base p-4">Loading…</div> } @else {
+    <section class="card-base p-4 mt-4">
+      <details>
+        <summary class="font-semibold flex items-center justify-between">
+          <span>Tasks</span>
+          <button class="btn-sm" (click)="copyTasks()">Copy</button>
+        </summary>
+        <div class="mt-3">
+          @if (devsWithTasks().length === 0) { <div class="text-sm text-slate-500">No tasks reported.</div> } @else {
+            <div class="mt-3 space-y-2 text-sm">
+              @for (d of devsWithTasks(); track d.developer_id) {
+                <div class="border rounded p-2">
+                  <div class="font-medium">{{ d.developer_name }}</div>
+                  <pre class="whitespace-pre-wrap mt-1">{{ d.highlights }}</pre>
+                  <span>-------------------------------------------</span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </details>
+    </section>
+
+    <section class="card-base p-4 mt-4">
+      <details>
+        <summary class="font-semibold flex items-center justify-between">
+          <span>Blockers</span>
+          <button class="btn-sm" (click)="copyBlockers()">Copy</button>
+        </summary>
+        <div class="mt-3">
+          @if (devsWithBlockers().length === 0) { <div class="text-sm text-slate-500">No blockers reported.</div> } @else {
+            <div class="mt-3 space-y-2 text-sm">
+              @for (d of devsWithBlockers(); track d.developer_id) {
+                <div class="border rounded p-2">
+                  <div class="font-medium">{{ d.developer_name }}</div>
+                  <span>-------------------------------------------</span>
+                  <pre class="whitespace-pre-wrap mt-1">{{ d.blockers }}</pre>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </details>
+    </section>
+
+    <section class="card-base p-4 mt-4">
+      <details>
+        <summary class="font-semibold flex items-center justify-between">
+          <span>Comments</span>
+          <button class="btn-sm" (click)="copyHighlights()">Copy</button>
+        </summary>
+        <div class="mt-3">
+          @if (devsWithHighlights().length === 0) { <div class="text-sm text-slate-500">No Comments reported.</div> } @else {
+            <div class="mt-3 space-y-2 text-sm">
+              @for (d of devsWithHighlights(); track d.developer_id) {
+                <div class="border rounded p-2">
+                  <div class="font-medium">{{ d.developer_name }}</div>
+                  <pre class="whitespace-pre-wrap mt-1">{{ d.comments }}</pre>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </details>
+    </section>
+
+    <!-- <section class="card-base p-4 mt-4">
+      <details open>
+        <summary class="font-semibold flex items-center justify-between">
+          <span>Tasks & Highlights (by Developer)</span>
+          <button class="btn-sm" (click)="copyTasks()">Copy</button>
+        </summary>
+        <div class="mt-3">
+          @if (byDeveloper().length === 0) { <div class="text-sm text-slate-500">No developer entries for this sprint/team.</div> } @else {
+            <div class="mt-3 space-y-3">
+              @for (dev of byDeveloper(); track dev.developer_id) {
+                <app-developer-summary [dev]="dev"></app-developer-summary>
+              }
+            </div>
+          }
+        </div>
+      </details>
+    </section> -->
+
+  }
+</div>
+
+@if (copyMessage()) {
+  <div class="fixed bottom-4 right-4 bg-emerald-600 text-white px-4 py-2 rounded shadow-lg">
+    {{ copyMessage() }}
+  </div>
+}

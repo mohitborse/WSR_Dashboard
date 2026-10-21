@@ -1,0 +1,45 @@
+<div class="border rounded p-3">
+  <div class="flex justify-between items-start mb-2">
+    <div>
+      <div class="text-sm font-semibold">{{ dev.developer_name }}</div>
+      <div class="text-xs text-slate-500">Stories: {{ dev.storiesDelivered }} / {{ dev.storiesPlanned }} · Points: {{ dev.pointsDelivered }} / {{ dev.pointsPlanned }}</div>
+    </div>
+    <div class="text-sm font-medium">Hrs: {{ dev.reportedHours }} · Leave: {{ dev.leaveHours }}</div>
+  </div>
+
+  <details class="mb-2">
+    <summary class="font-medium">Developer Tasks</summary>
+    <div class="mt-2 text-sm">
+      <table class="w-full text-sm mt-2">
+        <thead>
+          <tr class="text-left text-xs text-slate-500">
+            <th>Week</th>
+            <th>Reported Hrs</th>
+            <th>Stories</th>
+            <th>Points</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of dev.rows; track r.id) {
+            <tr>
+              <td>{{ r.week_number ?? 1 }}</td>
+              <td>{{ r.reported_hours }}</td>
+              <td>{{ r.stories_delivered }} / {{ r.stories_planned }}</td>
+              <td>{{ r.story_points_delivered }} / {{ r.story_points_planned }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <!-- <details class="mb-2">
+    <summary class="font-medium">Highlights</summary>
+    <div class="mt-2 text-sm whitespace-pre-wrap">{{ dev.highlights || '—' }}</div>
+  </details>
+
+  <details>
+    <summary class="font-medium">Comments</summary>
+    <div class="mt-2 text-sm whitespace-pre-wrap">{{ dev.comments || '—' }}</div>
+  </details> -->
+</div>

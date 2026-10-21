@@ -1,0 +1,24 @@
+<div *ngIf="loading()">Loading...</div>
+<div *ngIf="!loading() && rows().length === 0">No WSRs found.</div>
+<table *ngIf="!loading() && rows().length > 0" class="table">
+  <thead>
+    <tr>
+      <th>Sprint</th>
+      <th>Week</th>
+      <th>Reported Hours</th>
+      <th>Leave Hours</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let r of rows()">
+      <td>{{ r.sprint_name || r.sprints?.name }}</td>
+      <td>{{ r.week_number || 1 }}</td>
+      <td>{{ r.reported_hours }}</td>
+      <td>{{ r.leave_hours }}</td>
+      <td>{{ r.status }}</td>
+      <td><button (click)="edit(r)">Edit</button></td>
+    </tr>
+  </tbody>
+</table>
