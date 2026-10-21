@@ -50,12 +50,12 @@ export const routes: Routes = [
       },
       {
         path: 'admin/sprint-summary',
-        canActivate: [roleGuard(['ADMIN'])],
+        canActivate: [roleGuard(['ADMIN', 'MANAGER'])],
         loadComponent: () => import('./features/admin/sprint-summary.component').then((m) => m.SprintSummaryComponent),
       },
       {
         path: 'admin/developer-summaries',
-        canActivate: [roleGuard(['ADMIN'])],
+        canActivate: [roleGuard(['ADMIN', 'MANAGER'])],
         loadComponent: () => import('./features/admin/developer-summaries.component').then((m) => m.DeveloperSummariesComponent),
       },
     ],
