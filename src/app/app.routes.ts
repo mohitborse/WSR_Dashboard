@@ -20,7 +20,7 @@ export const routes: Routes = [
       },
       {
         path: 'data-entry',
-        canActivate: [roleGuard(['ADMIN', 'MANAGER'])],
+        canActivate: [roleGuard(['ADMIN', 'MANAGER', 'VIEWER'])],
         loadComponent: () =>
           import('./features/data-entry/data-entry.component').then((m) => m.DataEntryComponent),
       },
