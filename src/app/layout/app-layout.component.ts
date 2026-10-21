@@ -31,7 +31,12 @@ export class AppLayoutComponent {
     { label: 'Developer Summaries', path: '/admin/developer-summaries' },
   ];
 
-  constructor(public auth: AuthService, private router: Router) {}
+  managerNav: NavItem[] = [
+    { label: 'Sprint Summary', path: '/admin/sprint-summary' },
+    { label: 'Developer Summaries', path: '/admin/developer-summaries' },
+  ];
+
+  constructor(public auth: AuthService, private router: Router) { }
 
   toggleSidebar(): void {
     this.sidebarOpen.set(!this.sidebarOpen());

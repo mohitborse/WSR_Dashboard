@@ -41,6 +41,24 @@
           }
         </div>
       }
+
+      @if (auth.isManager()) {
+        <div class="pt-4 mt-2 border-t border-white/10">
+          @if (sidebarOpen()) {
+            <p class="px-3 pb-1 text-[11px] uppercase tracking-wide text-slate-500">Manager</p>
+          }
+          @for (item of managerNav; track item.path) {
+            <a
+              [routerLink]="item.path"
+              routerLinkActive="bg-white/10 text-white"
+              class="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
+            >
+              <span class="h-1.5 w-1.5 rounded-full bg-current opacity-60 shrink-0"></span>
+              @if (sidebarOpen()) {<span class="whitespace-nowrap">{{ item.label }}</span>}
+            </a>
+          }
+        </div>
+      }
     </nav>
 
     <button
