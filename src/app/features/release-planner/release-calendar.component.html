@@ -1,0 +1,19 @@
+<div class="calendar-header">
+  <h1>{{ currentMonth | date: 'MMMM' }} <span>{{ currentMonth | date: 'yyyy' }}</span></h1>
+  <div class="legend" aria-label="Calendar legend"><span><i class="ppd"></i>PPD</span><span><i class="prod"></i>Production</span><span><i class="panda"></i>Panda</span><span><i class="avenger"></i>Avenger</span><span><i class="apollo"></i>Apollo</span></div>
+  <nav class="month-navigation" aria-label="Month navigation"><button type="button" title="Previous month" (click)="previousMonth.emit()"><lucide-icon [img]="ChevronLeft" [size]="14" /></button><button type="button" title="Today" (click)="todaySelected.emit()"><lucide-icon [img]="CalendarDays" [size]="14" /></button><button type="button" title="Next month" (click)="nextMonth.emit()"><lucide-icon [img]="ChevronRight" [size]="14" /></button></nav>
+</div>
+<div class="calendar-grid">
+  @for (weekDay of weekDays; track weekDay) { <div class="weekday">{{ weekDay }}</div> }
+  @for (day of days; track day.key) {
+    <button type="button" class="day" [class.outside]="!day.inMonth" [class.selected]="day.key === selectedDate" (click)="dateSelected.emit(day.key)">
+      <span class="day-number" [class.today]="day.today">{{ day.number }}</span>
+      <span class="events">
+        @for (release of releasesFor(day.key); track release.id; let index = $index) {
+          @if (index < 3) { <span class="event" [class.prod]="release.environment === 'Prod'" [class.completed]="release.status === 'Completed'" (click)="chooseRelease($event, release)"><i [class]="release.pod.toLowerCase()"></i><b>{{ release.title }}</b></span> }
+        }
+        @if (releasesFor(day.key).length > 3) { <span class="more">+{{ releasesFor(day.key).length - 3 }} more</span> }
+      </span>
+    </button>
+  }
+</div>

@@ -1,0 +1,15 @@
+<div class="backdrop" role="presentation" (mousedown)="closeOnBackdrop($event)">
+  <section class="modal" role="dialog" aria-modal="true" aria-labelledby="release-modal-title">
+    <header><h2 id="release-modal-title">{{ release ? 'Edit Release' : 'New Release' }}</h2><button type="button" title="Close" [disabled]="saving" (click)="dismissed.emit()"><lucide-icon [img]="X" [size]="20" /></button></header>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <label class="full"><span>Title *</span><input type="text" formControlName="title" placeholder="Release title" autofocus />@if (form.controls.title.touched && form.controls.title.invalid) { <small>Enter a title (120 characters maximum).</small> }</label>
+      <label class="full"><span>Description</span><textarea formControlName="description" rows="3" placeholder="Changes, fixes, or features in this release..."></textarea></label>
+      <label><span>Environment *</span><span class="select"><select formControlName="environment">@for (environment of options.environments; track environment) { <option [value]="environment">{{ environment }}</option> }</select><lucide-icon [img]="ChevronDown" [size]="16" /></span></label>
+      <label><span>POD *</span><span class="select"><select formControlName="pod">@for (pod of options.pods; track pod) { <option [value]="pod">{{ pod }}</option> }</select><lucide-icon [img]="ChevronDown" [size]="16" /></span></label>
+      <label><span>Date *</span><input type="date" formControlName="scheduled_date" /></label>
+      <label><span>Time *</span><input type="time" formControlName="scheduled_time" /></label>
+      <label class="status"><span>Status *</span><span class="select"><select formControlName="status">@for (status of options.statuses; track status) { <option [value]="status">{{ status }}</option> }</select><lucide-icon [img]="ChevronDown" [size]="16" /></span></label>
+      <footer><button class="cancel" type="button" [disabled]="saving" (click)="dismissed.emit()">Cancel</button><button class="save" type="submit" [disabled]="saving">{{ saving ? 'Saving...' : (release ? 'Save Changes' : 'Save Release') }}</button></footer>
+    </form>
+  </section>
+</div>

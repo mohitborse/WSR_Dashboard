@@ -84,3 +84,16 @@ from (values
 join d on d.email = v.email
 cross join sp
 on conflict (developer_id, sprint_id) do nothing;
+
+-- 6) Optional Release Planner demo data -------------------------------------
+insert into releases (title, description, environment, pod, scheduled_date, scheduled_time, status)
+select v.title, v.description, v.environment, v.pod, v.scheduled_date::date, v.scheduled_time::time, v.status
+from (values
+  ('QA Release Estimate quickwins', 'Validation fixes and estimation workflow improvements.', 'PPD', 'Panda', '2026-11-03', '14:00', 'Planned'),
+  ('Procurement API rollout', 'Production rollout for vendor contract endpoints.', 'Prod', 'Avenger', '2026-11-12', '10:30', 'In Progress'),
+  ('Reporting performance patch', 'Dashboard query and rendering performance updates.', 'Prod', 'Apollo', '2026-11-20', '16:00', 'Completed')
+) as v(title, description, environment, pod, scheduled_date, scheduled_time, status)
+where not exists (
+  select 1 from releases r
+  where r.title = v.title and r.scheduled_date = v.scheduled_date::date
+);

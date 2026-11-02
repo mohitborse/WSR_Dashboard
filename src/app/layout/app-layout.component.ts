@@ -21,6 +21,7 @@ export class AppLayoutComponent {
   mainNav: NavItem[] = [
     { label: 'Dashboard', path: '/dashboard' },
     { label: 'Data Entry', path: '/data-entry' },
+    { label: 'Release Planner', path: '/releases' },
   ];
 
   adminNav: NavItem[] = [

@@ -58,6 +58,12 @@ export const routes: Routes = [
         canActivate: [roleGuard(['ADMIN', 'MANAGER'])],
         loadComponent: () => import('./features/admin/developer-summaries.component').then((m) => m.DeveloperSummariesComponent),
       },
+      {
+        path: 'releases',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./features/release-planner/release-planner.component').then((m) => m.ReleasePlannerComponent),
+      },
     ],
   },
   { path: '**', redirectTo: 'dashboard' },

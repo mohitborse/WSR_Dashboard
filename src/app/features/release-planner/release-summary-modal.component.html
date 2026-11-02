@@ -1,0 +1,31 @@
+<div class="summary-backdrop" role="presentation" (mousedown)="closeOnBackdrop($event)">
+  <section class="summary-modal" role="dialog" aria-modal="true" aria-labelledby="release-summary-title">
+    <header>
+      <div class="summary-heading"><span>Management overview</span><h2 id="release-summary-title">Release Summary</h2></div>
+      <div class="summary-actions">
+        <button class="copy-summary" type="button" (click)="copySummary()" [attr.aria-label]="copied() ? 'Release summary copied' : 'Copy release summary'">
+          <lucide-icon [img]="copied() ? Check : Copy" [size]="15" /><span>{{ copied() ? 'Copied' : 'Copy' }}</span>
+        </button>
+        <button class="close-summary" type="button" title="Close summary" (click)="dismissed.emit()"><lucide-icon [img]="X" [size]="20" /></button>
+      </div>
+    </header>
+    <div class="summary-content">
+      <section class="metric-grid" aria-label="Release totals">
+        <article class="total"><span>All Releases</span><strong>{{ summary.total }}</strong></article>
+        <article class="ppd"><span>PPD</span><strong>{{ summary.environments.ppd }}</strong></article>
+        <article class="prod"><span>Production</span><strong>{{ summary.environments.prod }}</strong></article>
+        <article><span>Planned</span><strong>{{ summary.statuses.planned }}</strong></article>
+        <article><span>In Progress</span><strong>{{ summary.statuses.inProgress }}</strong></article>
+        <article class="complete"><span>Completed</span><strong>{{ summary.statuses.completed }}</strong></article>
+      </section>
+      <section class="breakdown">
+        <div><h3>Releases by POD</h3><ul><li><i class="panda"></i><span>Panda</span><strong>{{ summary.pods.panda }}</strong></li><li><i class="avenger"></i><span>Avenger</span><strong>{{ summary.pods.avenger }}</strong></li><li><i class="apollo"></i><span>Apollo</span><strong>{{ summary.pods.apollo }}</strong></li></ul></div>
+        <div class="upcoming"><h3>Upcoming deployments</h3>
+          @for (release of summary.upcoming.slice(0, 5); track release.id) {
+            <article><span class="date"><lucide-icon [img]="CalendarDays" [size]="14" />{{ releaseDate(release) | date: 'MMM d, h:mm a' }}</span><strong>{{ release.title }}</strong><small>{{ release.environment }} · {{ release.pod }} · {{ release.status }}</small></article>
+          } @empty { <p>No upcoming deployments.</p> }
+        </div>
+      </section>
+    </div>
+  </section>
+</div>

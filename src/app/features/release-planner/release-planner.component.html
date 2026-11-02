@@ -1,0 +1,64 @@
+<div class="planner-shell">
+    <header class="topbar">
+        <div class="brand" aria-label="Release Planner">
+            <span class="brand-mark">RP</span>
+            <span><strong>Release Planner</strong><small>deployment calendar</small></span>
+        </div>
+        <div class="filters" aria-label="Release filters">
+            <div class="filter-group">
+                <span class="filter-label">Env</span>
+                <button type="button" [class.active]="store.environmentFilter() === 'All'"
+                    (click)="setEnvironment('All')">All</button>
+                @for (environment of store.options().environments; track environment) {
+                <button type="button" [class.active]="store.environmentFilter() === environment"
+                    (click)="setEnvironment(environment)"><span class="dot"
+                        [class.prod]="environment === 'Prod'"></span>{{ environment }}</button>
+                }
+            </div>
+            <div class="filter-group status-filters">
+                <span class="filter-label">Status</span>
+                <button type="button" [class.active]="store.statusFilter() === 'All'"
+                    (click)="setStatus('All')">All</button>
+                @for (status of store.options().statuses; track status) {
+                <button type="button" [class.active]="store.statusFilter() === status" (click)="setStatus(status)">{{
+                    status }}</button>
+                }
+            </div>
+            <label class="pod-filter">
+                <span class="filter-label">Pod</span>
+                <span class="select-wrap"><select [value]="store.podFilter()" (change)="setPod($event)">
+                        <option value="All">All PODs</option>@for (pod of store.options().pods; track pod) { <option [value]="pod">{{
+                            pod }}</option> }
+                    </select><lucide-icon [img]="ChevronDown" [size]="16" aria-hidden="true" /></span>
+            </label>
+        </div>
+        @if (auth.isAdmin() || auth.isManager()) { <button class="summary-button" type="button"
+            (click)="store.summaryOpen.set(true)"><lucide-icon [img]="BarChart3" [size]="15"
+                aria-hidden="true" /><span>Release Summary</span></button> }
+        <button class="add-button" type="button" (click)="store.openCreate()"><lucide-icon [img]="Plus" [size]="15"
+                aria-hidden="true" /><span>Add New Release</span></button>
+    </header>
+    <main class="workspace">
+        <section class="calendar-pane" aria-label="Deployment calendar">
+            @if (store.loading()) {
+            <div class="loading"><lucide-icon [img]="CalendarDays" [size]="30" aria-hidden="true" /><span>Loading
+                    releases...</span></div>
+            } @else {
+            <app-release-calendar [currentMonth]="store.currentMonth()" [selectedDate]="store.selectedDate()"
+                [releases]="store.filteredReleases()" (dateSelected)="store.selectedDate.set($event)"
+                (releaseSelected)="store.openEdit($event)" (previousMonth)="store.moveMonth(-1)"
+                (nextMonth)="store.moveMonth(1)" (todaySelected)="store.goToToday()" />
+            }
+        </section>
+        <app-release-sidebar [selectedDate]="store.selectedDate()" [releases]="store.selectedDateReleases()"
+            [summary]="store.summary()" (editRelease)="store.openEdit($event)" (deleteRelease)="remove($event)"
+            (addRelease)="store.openCreate()" />
+    </main>
+    @if (store.error()) { <div class="toast error" role="alert">{{ store.error() }}</div> }
+    @if (store.notice()) { <div class="toast success" role="status">{{ store.notice() }}</div> }
+    @if (store.summaryOpen()) { <app-release-summary-modal [summary]="store.adminSummary()"
+        (dismissed)="store.summaryOpen.set(false)" /> }
+    @if (store.modalOpen()) { <app-release-form-modal [release]="store.editingRelease()"
+        [options]="store.options()" [defaultDate]="store.selectedDate()" [saving]="store.saving()" (dismissed)="store.closeModal()"
+        (submitted)="save($event)" /> }
+</div>

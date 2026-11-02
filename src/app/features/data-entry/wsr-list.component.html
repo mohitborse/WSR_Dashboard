@@ -1,3 +1,4 @@
+<div class="p-4 md:p-6">
 <div *ngIf="loading()">Loading...</div>
 <div *ngIf="!loading() && rows().length === 0">No WSRs found.</div>
 <table *ngIf="!loading() && rows().length > 0" class="table">
@@ -22,3 +23,4 @@
     </tr>
   </tbody>
 </table>
+</div>
